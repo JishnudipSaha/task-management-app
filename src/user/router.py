@@ -1,6 +1,6 @@
 from this import d
 from fastapi import APIRouter, Depends, status
-from starlette.status import HTTP_100_CONTINUE, HTTP_201_CREATED
+from starlette.status import HTTP_201_CREATED
 from src.user.dtos import UserSchema
 from sqlalchemy.orm import Session
 from src.utils.db import get_db
