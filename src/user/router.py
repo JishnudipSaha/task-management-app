@@ -1,4 +1,3 @@
-from this import d
 from fastapi import APIRouter, Depends, status
 from starlette.status import HTTP_201_CREATED
 from src.user.dtos import UserSchema
