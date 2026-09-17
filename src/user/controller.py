@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from src.user.dtos import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 from src.user.models import UserModel
@@ -6,6 +6,7 @@ from pwdlib import PasswordHash
 import jwt
 from src.utils.settings import settings
 from datetime import datetime, timedelta
+from jwt import InvalidTokenError
 
 
 password_hash = PasswordHash.recommended()
@@ -47,7 +48,9 @@ def register(body: UserSchema, db: Session):
 
 
 def login_user(body: LoginSchema, db:Session):
+
     user = db.query(UserModel).filter(UserModel.user_name == body.user_name).first()
+
     # if the username is wrong
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Entered wrong username')
@@ -57,7 +60,34 @@ def login_user(body: LoginSchema, db:Session):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Entered wrong password')
     
     exp_time = datetime.now() + timedelta(minutes=settings.EXP_TIME)
-    token = jwt.encode({"_id" : user.id, "exp": exp_time}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+    token = jwt.encode({"_id" : user.id, "exp": exp_time.timestamp()}, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
     return{
         "token": token
     }
+
+
+def is_authenticated(request: Request, db: Session):
+
+    try:
+        token = request.headers.get('authorization')
+
+        if not token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            
+        token = token.split(" ")[-1]
+        data = jwt.decode(token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM)
+        user_id = data.get('_id')
+
+        # checking if the user existes in the db or not.
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Entered wrong username')
+
+        # return the user.
+        return user
+        
+    except InvalidTokenError:
+        # if the token validation reise error then rasie this http exception
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid Token')
