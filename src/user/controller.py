@@ -6,7 +6,7 @@ from pwdlib import PasswordHash
 import jwt
 from src.utils.settings import settings
 from datetime import datetime, timedelta
-from jwt import InvalidTokenError
+from jwt.exceptions import InvalidTokenError
 
 
 password_hash = PasswordHash.recommended()
