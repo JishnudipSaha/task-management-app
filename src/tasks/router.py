@@ -1,4 +1,3 @@
-from this import d
 from typing import List
 from fastapi import APIRouter, Depends, status
 from src.tasks import controller
