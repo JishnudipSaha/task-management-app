@@ -7,6 +7,7 @@ import jwt
 from src.utils.settings import settings
 from datetime import datetime, timedelta
 from jwt.exceptions import InvalidTokenError
+from src.utils.mail import send_email
 
 
 password_hash = PasswordHash.recommended()
@@ -20,7 +21,7 @@ def verify_password(plain_password, hashed_password):
     return password_hash.verify(plain_password, hashed_password)
 
 
-def register(body: UserSchema, db: Session):
+async def register(body: UserSchema, db: Session):
     '''1. User validation'''
     is_user = db.query(UserModel).filter(UserModel.user_name == body.user_name).first()
     if is_user:
@@ -43,6 +44,11 @@ def register(body: UserSchema, db: Session):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # send email confirmation
+    res = await send_email([new_user.email])
+    print(res)
+
 
     return new_user
 

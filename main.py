@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from src.utils.db import Base, engine
-from src.tasks.models import TaskModel
 from src.tasks.router import task_routes
 from src.user.router import user_routes
 

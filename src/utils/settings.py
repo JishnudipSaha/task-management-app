@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
     EXP_TIME: int
+    MAIL_PASSWORD: str
     
 settings = Settings()
 print(settings.DB_CONNECTION)
